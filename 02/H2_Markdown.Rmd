@@ -1,0 +1,65 @@
+---
+title: "Applied Regression - H2"
+author: "Harshita Agarwala"
+date: "November 20, 2017"
+output:
+  html_document:
+    df_print: paged
+---
+PART a)
+Reading LAozone Data
+```{r}
+LAozone<-read.csv("C:/Users/MAX/TUM/Applied Regression/LAozone.csv")
+```
+Checking correlation coefficients of ozone with every variable
+
+```{r}
+cor(LAozone[,1],LAozone)
+```
+We can cleary see that the absolute value of the correlation between ozone and temperature is the highest. Therefore we first use temperature as the predictor.
+```{r}
+temp<-as.vector(LAozone[,5])
+ozone<-as.vector(LAozone[,1])
+f1<-lm(ozone~temp)
+f1
+```
+
+
+```{r}
+library("tidyverse", lib.loc="~/R/win-library/3.4")
+LAozone$season<-factor(LAozone$doy<=89|LAozone$doy>273,
+levels=c(TRUE,FALSE),labels=c("winter","summer"))
+season<-as.vector(LAozone[,12])
+f2<-lm(ozone~season)
+f2
+```
+
+From the summary function for the f1 and the f2 models, we can see that the b1 value for the first model is 0.43257. This means that for a unit increase in temperature, the value of ozone increases by 0.43257 units. Similarly, the value of b1 for f2 model is -8.1048 which means for a unit increase in x(i.e going from season 'April to September' to 'October to March') the ozone falls by 8.1048 units.
+
+PART b)
+```{r}
+library("ggplot2", lib.loc="~/R/win-library/3.4")
+library("ggfortify", lib.loc="~/R/win-library/3.4")
+autoplot(f1,c(1:2))
+```
+
+The first plot is the Residual Vs Fitted Values. This plot shows how the residuals vary with the predicted values. We can see from this graph that the residuals are like random noise(expected behaviour). Also we can see that the Normal Q-Q plot is linear. This means that the residuals are normally distributed.
+```{r}
+autoplot(f2,c(1:2))
+```
+
+The plot Residual Vs Fitted shows how the residuals vary with the predicted values. We can see from this graph that the residuals vary a lot and the model predicts just two values for all the data points. Hence the high level of variation. This signifies a very poor regression modelling. Although, from the Normal Q-Q plot, the residuals seems to be almost normaly distributed, but from the first plot we know that it is not a good model. 
+
+PART c)
+```{r}
+summary(f1)
+summary(f2)
+```
+I prefer the first model, as the residuals analysis for it is better for a simple regression model. The standard error for b1, is less for the first model than the second, showing less variation. Also, the R-squared value for the first is better than the second showing a stronger relation.
+
+PART d)
+```{r}
+qplot_lm<-function(lm_model,cat_pred=FALSE){autoplot(lm_model,c(1:2))}
+qplot_lm(f1)
+qplot_lm(f2)
+```

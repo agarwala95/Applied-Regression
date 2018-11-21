@@ -1,0 +1,24 @@
+---
+title: "HW6"
+date: "January 30, 2018"
+output: html_document
+---
+```{r}
+library("readr", lib.loc="~/R/win-library/3.4")
+library("ggplot2", lib.loc="~/R/win-library/3.4")
+library("tidyverse", lib.loc="~/R/win-library/3.4")
+nitrate <- read_csv("C:/Users/MAX/TUM/Applied Regression/nitrate.csv",col_names=TRUE)
+data_plot<- ggplot(nitrate, aes(x = Light, y = Nitrate, colour = Day)) + geom_point() +
+  xlab("light intensity") + ylab("nitrate utilization")
+
+startB1<-max(nitrate$Nitrate)
+startB2<-nitrate$Light[nitrate$Nitrate==startB1]
+model1<- nls(Nitrate ~ (B1 * Light)/(B2+Light), data = nitrate,start = list(B2 = startB2, B1 = startB1))
+summary(model1)
+B1<-coef(model1)[2]
+B2<-coef(model1)[1]
+
+data_plot+stat_function(fun=function(Light){(B1 * Light)/(B2+Light)})
+```
+
+The model is quite adequate as it recognizes the trend in the data set.

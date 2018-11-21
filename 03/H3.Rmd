@@ -1,0 +1,71 @@
+---
+title: "H3 Assignment"
+date: "December 3, 2017"
+output: html_document
+---
+Problem a)
+```{r}
+library("readr", lib.loc="~/R/win-library/3.4")
+sales <- read_csv("C:/Users/MAX/TUM/Applied Regression/sales.csv",col_names=TRUE)
+print(sales)
+library("ggplot2", lib.loc="~/R/win-library/3.4")
+library("GGally", lib.loc="~/R/win-library/3.4")
+ggpairs(sales,columns=1:5)
+```
+
+We can see that the relation between X1~Y and X4~Y is random but increasing. However, the relation between X2~Y is a positive exponential relation. While for X3~Y is a negative exponential relation.We can also see verify the relation by the correlation co-efficients.
+
+Problem b)
+```{r}
+library("ggfortify", lib.loc="~/R/win-library/3.4")
+f1<-lm(Y~X1+X2+X3+X4,sales)
+autoplot(f1,c(1:2))
+summary(f1)
+```
+
+From the Residual vs Fitted Values graph, we can see that the values are randomly distributed and from the second graph, the values are almost linear, implying that the residuals are normally distributed. Hence, there are no strong violations of the model assumptions. The R-Squared value of 0.9971, also signifies a strong relation between all the predictors and Y.
+
+Problem c)
+```{r}
+Model1<-lm(Y~X1+X2+X3,sales)
+Model2<-lm(Y~X1+X2,sales)
+sales$X5<-sales$X2+sales$X3
+Model3<-lm(Y~X1+X5+X4,sales)
+Model4<-lm(Y~1,sales)
+anova(f1,Model1)
+anova(f1,Model2)
+anova(f1,Model3)
+anova(f1,Model4)
+```
+
+For Model1, the P-Value is 0.5376>0.05 therefore we accept the null hypothesis. This means that the predictor variable X4, does not affect Y and is not important. 
+
+For Model2, the P-value is 7.524e-12<0.05 therefore we reject the null hypothesis. This means that the predictor varaible X3 can not be 0 as Y is dependant on it. From the previous model, we had accepted that X4 is 0. Therefore, B3 can not be 0.
+
+For Model3, the p-value is 4.42e-13<0.05 therefore we reject the null hypothesis. This means that the affect of X2 and X3 are different on Y and not the same. Therefore B2 can not be equal to B3.
+
+For Model4, the p-value is 1.285e-12<0.05 therefore we reject the null hypothesis. This means that all B1,B2,B3 and B4 can not be 0. 
+
+Problem d)
+```{r}
+test_linht<-function(model_red,model_full,df_add,df_full)
+{aov_mod<-anova(model_full,model_red)
+list("test-statistic"=aov_mod[2,5],"p-value"=aov_mod[2,6])
+}
+test_linht(Model2,f1,1,10)
+```
+
+Problem e)
+```{r}
+summary(Model1)
+```
+
+The coefficients of this model, tell us that if all variables stay constant and only X1 increases by one unit($1000) then Y increases by 2.105 units ($210,555). Similarly, if all variables stay constant and only X2 increases by one unit then Y increases by $356,240. Also, if X3 increases by one unit and all variables stay constant then, Y falls by $2,218,799. Moreover any change in X4 does not affect Y in this model.
+
+Problem f)
+```{r}
+new_data<-data.frame("X1"=3,"X2"=45,"X3"=10)
+predict.lm(Model1,new_data,interval="prediction")
+```
+
+Thus model predicts a value of 123.2655 for Y with X1=3,X2=45,X3=10 and the 95% prediction level says the Y value will fluctuate between 111.45 and 135.07 units.

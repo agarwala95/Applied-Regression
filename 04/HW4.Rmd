@@ -1,0 +1,24 @@
+---
+title: "HW4"
+date: "December 19, 2017"
+output: html_document
+---
+Problem e)
+```{r}
+library("readr", lib.loc="~/R/win-library/3.4")
+library("ggplot2", lib.loc="~/R/win-library/3.4")
+weightloss <- read_csv("C:/Users/MAX/TUM/Applied Regression/weightloss.csv",col_names=TRUE)
+ggplot(weightloss,aes(Before,Loss))+geom_point()+labs(x="Before",y="Loss")
+model<-lsfit(weightloss$Before,weightloss$Loss)
+summary(model)
+```
+
+The diagonal elements of the Hat matrix are given by:
+```{r}
+H<-ls.diag(model)$hat
+h_bar<-mean(H)
+high_leverage<-H>2*h_bar
+ggplot(weightloss, aes(x=Before, y=Loss)) + geom_point(aes(color=high_leverage))
+```
+
+This method does not catch all the outliers as the point(275,51) is not identified as an outlier.

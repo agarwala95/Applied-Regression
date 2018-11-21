@@ -1,0 +1,67 @@
+---
+title: "HW5"
+date: "January 15, 2018"
+output: html_document
+---
+a)
+```{r}
+library("readr", lib.loc="~/R/win-library/3.4")
+library("ggplot2", lib.loc="~/R/win-library/3.4")
+library("quantreg", lib.loc="~/R/win-library/3.4")
+library("car", lib.loc="~/R/win-library/3.4")
+library("alr3", lib.loc="~/R/win-library/3.4")
+library("ggfortify", lib.loc="~/R/win-library/3.4")
+
+coral_reefs <- read_csv("C:/Users/MAX/TUM/Applied Regression/coral_reefs.csv",col_names=TRUE)
+ggplot(coral_reefs, aes(x=Distance, y=Density)) + geom_point(aes(color=Reef))
+```
+
+b)
+```{r}
+models_list<-list(model1=lm(Density~Distance,coral_reefs),model2=lm(Density~Distance+I(Distance^2),coral_reefs),model3=lm(Density~Distance+I(Distance^2)+I(Distance^3),coral_reefs),model4=lm(Density~Distance+I(Distance^2)+I(Distance^3)+I(Distance^4),coral_reefs),model5=lm(Density~Distance+I(Distance^2)+I(Distance^3)+I(Distance^4)+I(Distance^5),coral_reefs),model6=lm(Density~Distance+I(Distance^2)+I(Distance^3)+I(Distance^4)+I(Distance^5)+I(Distance^6),coral_reefs),model7=lm(Density~Distance+I(Distance^2)+I(Distance^3)+I(Distance^4)+I(Distance^5)+I(Distance^6)+I(Distance^7),coral_reefs))
+```
+
+Now we make use of the pureErrorAnova function, this gives a Lack of Fit criteria. The null hypothesis in this case is: the given model is a reasonable fit. Hence, we accept the null hypothesis if it is more than 0.05. We find that model7, with degree 7, is the best fit for the data.
+```{r}
+pureErrorAnova(models_list[[6]])
+pureErrorAnova(models_list[[7]])
+```
+
+c)
+```{r}
+autoplot(models_list[[7]])
+```
+
+We can see from the residual analysis plot as well that the model is a good fit for the data.
+```{r}
+cutoff<-4/((nrow(coral_reefs)-length(models_list[[7]]$coefficients)-2))
+plot(models_list[[7]],which=4,cook.levels=cutoff)
+cooks.distance(models_list[[7]])>cutoff
+```
+
+According to Cook's D statistic, the 2nd and 26th points are outliers.
+```{r}
+powerTransform(models_list[[7]])$lam
+boxCox(models_list[[7]],lambda=1)
+boxCox(models_list[[7]])
+```
+
+The change in power transformation is -0.4147315, which is a very small change. This means that the model is correct. Also, for lambda=1, the likelihood is not present, hence we reject this hypothesis.
+
+From the last plot, we can see that for -0.4147315 the log-likelihood is maximum. Hence, the transformation should be applied.
+```{r}
+trans_mod<-lm(Density^(-0.4147315)~Distance+I(Distance^2)+I(Distance^3)+I(Distance^4)+I(Distance^5)+I(Distance^6)+I(Distance^7),coral_reefs)
+summary(trans_mod)
+autoplot(trans_mod)
+```
+
+Both from summary and R-squared value, we can see that the model is a very good fit.
+
+d)
+```{r}
+sapply(models_list,summary)[9,]
+sapply(models_list,AIC)
+```
+
+From the adjusted R-squared value, we can see a strong jump to 0.8 in model7.
+From AIC values we can see a large difference between model6 and model7, and AIC(model7)< AIC(model6) which shows that the model7 is highly significant over model6.
